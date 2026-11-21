@@ -78,3 +78,15 @@ def test_cli_writes_file(tmp_path, capsys):
 
 def test_cli_rejects_bad_input(capsys):
     assert main(['{"A":[1,2,3]}']) == 2
+
+
+def test_default_datarate_is_1m():
+    root = ET.fromstring(build_schedule_xml({"A": 0, "B": 1}))
+    assert root.find("multiframe").get("datarate") == "1M"
+    assert root.find("structure").get("bandwidth") == "1M"
+
+
+def test_cli_datarate_option(tmp_path):
+    out = tmp_path / "s.xml"
+    assert main(["--file", str(ROOT / "config" / "nodes.json"), "--datarate", "2M", "--output", str(out)]) == 0
+    assert ET.fromstring(out.read_text()).find("multiframe").get("datarate") == "2M"

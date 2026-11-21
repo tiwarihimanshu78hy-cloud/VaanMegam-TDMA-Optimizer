@@ -5,8 +5,9 @@ Mapping (one frame per multiframe, so the frame length equals the number of slot
   Node_01 .. Node_16     -> NEM ids 1 .. 16 (natural sort order)
 Slots that are not listed are receive slots for every NEM in the schedule (EMANE behaviour).
 
-NOTE: the XML layout follows the public EMANE TDMA model documentation and example. It has
-not been validated against EMANE's own schema or run inside an EMANE emulation yet.
+NOTE: the generated XML was accepted by EMANE 1.5.3's own tool (emaneevent-tdmaschedule exited
+with code 0). It has not been run inside a full EMANE emulation, so packet delivery according
+to the schedule is NOT verified.
 """
 import argparse
 import sys
@@ -28,7 +29,7 @@ def nem_ids(nodes):
 
 
 def build_schedule_xml(slot_of, slot_duration_us=1000, slot_overhead_us=0, bandwidth="1M",
-                       frequency="2.4G", power="0", service_class="0", datarate="100M"):
+                       frequency="2.4G", power="0", service_class="0", datarate="1M"):
     """Return the EMANE TDMA schedule XML (as a string) for a {node: slot} schedule."""
     if not slot_of:
         raise ValueError("Cannot build a schedule for zero nodes")
@@ -84,6 +85,8 @@ def main(argv=None):
     p.add_argument("--file", help="read the node coordinates from this JSON file instead")
     p.add_argument("--range", type=float, default=RADIO_RANGE_M, dest="radio_range")
     p.add_argument("--slot-us", type=int, default=1000, help="slot duration in microseconds (default 1000 = 1 ms)")
+    p.add_argument("--datarate", default="1M",
+                   help="slot data rate, e.g. 1M (default 1M, a rate present in EMANE's shipped PCR curve file)")
     p.add_argument("--output", default=DEFAULT_OUTPUT, help=f"XML output path (default {DEFAULT_OUTPUT})")
     args = p.parse_args(sys.argv[1:] if argv is None else argv)
     if (args.json_string is None) == (args.file is None):
@@ -97,7 +100,7 @@ def main(argv=None):
         if not ok:
             print("Error: schedule failed verification:", *problems, sep="\n  - ", file=sys.stderr)
             return 1
-        xml_text = build_schedule_xml(slot_of, slot_duration_us=args.slot_us)
+        xml_text = build_schedule_xml(slot_of, slot_duration_us=args.slot_us, datarate=args.datarate)
     except (OSError, ValueError) as e:
         print(f"Error: {e}", file=sys.stderr)
         return 2
