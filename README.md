@@ -75,4 +75,11 @@ JSON, the validator itself and the matrix check.
 
 ## Part 2 (bonus): EMANE
 
-Status: not started yet (this section will be updated honestly with what was actually done).
+Status: partially done.
+
+- EMANE 1.5.3 installed on Ubuntu 24.04.
+- `src/emane_bridge.py` converts the schedule into an EMANE TDMA schedule XML (1 ms slots; Node_01..Node_16 = NEM 1..16):
+  `python src/emane_bridge.py --file config/nodes.json` writes `emane/configuration/tdma-schedule.xml`.
+- EMANE's own tool `emaneevent-tdmaschedule` accepted the generated XML (exit code 0).
+- NOT done: a multi-node emulation showing packets delivered according to the schedule.
+  See `docs/Project_Documentation.pdf`, section 8.
